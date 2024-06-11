@@ -1,17 +1,16 @@
-#include "transacoes.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include "consulta.h"
+#include "manipulacao.h"
 
 int main(){
     Transacao t;
-    ifstream inFile("transacoes.csv");
-    ofstream outFile("teste.dat");
+    ifstream inFile = abrirArquivoEntrada("transacoes.csv");
+    ofstream outFile = abrirArquivoSaida("teste.dat");
     string linha;
     stringstream ss;
-
-    if(!inFile.is_open() || !outFile.is_open()){
-        cout << "Falha ao abrir algum dos arquivos!" << endl;
-        exit(EXIT_FAILURE);
-    }
-
     
     for(int i=0; i<=5; i++){
         getline(inFile, linha);
@@ -19,16 +18,17 @@ int main(){
         alocarNoFluxoAString(linha, &ss, &t);
 
         outFile.write(linha.c_str(), linha.length());
-        printf("\n\n Linha  iteração [%d]: %s", i, linha.c_str());
+        // printf("\n\n Linha  iteração [%d]: %s", i, linha.c_str()); //Teste
         outFile.put('\n');
 
         // imprimirTransacao(t);
+        
     }
 
+    realizarConsultaData();
 
-    inFile.close();
-    outFile.close();
 
+    fecharArquivos(&inFile, &outFile);
 
     return 0;
 }
