@@ -19,6 +19,7 @@ ofstream abrirArquivoSaida(string nomeDoArquivo);
 void fecharArquivos(ifstream* input, ofstream* output);
 void fluxoParaTransacao(stringstream* ss, Transacao* t);
 void alocarNoFluxoAString(string linha, stringstream* ss, Transacao *t);
+ofstream abrirLogFile(string nomeDoArquivoLog);
 
 
 #endif /*TRASACOES_H*/

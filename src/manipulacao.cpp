@@ -2,14 +2,14 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "consulta.h"
-#include "manipulacao.h"
+#include "../headers/consulta.h"
+#include "../headers/manipulacao.h"
 
 ifstream abrirArquivoEntrada(string nomeDoArquivo){
     ifstream inFile(nomeDoArquivo);
 
     if(!inFile.is_open()){
-        cout << "Houve um erro ao ler o arquivo de entrada." << endl;
+        cout << "Houve um erro ao ler o arquivo " << nomeDoArquivo << "!" << endl;
         exit(EXIT_FAILURE);
     }  
 
@@ -20,11 +20,20 @@ ofstream abrirArquivoSaida(string nomeDoArquivo){
     ofstream outFile(nomeDoArquivo);
 
     if(!outFile.is_open()){
-        cout << "Houve um erro ao abrir o arquivo de saída." << endl;
+        cout << "Houve um erro ao abrir o arquivo de saída '" << nomeDoArquivo << "'!" << endl;
         exit(EXIT_FAILURE);
     }  
 
     return outFile;
+}
+
+ofstream abrirLogFile(string nomeDoArquivoLog){
+    ofstream logFile(nomeDoArquivoLog, ios::app); //abrindo em modo append
+    if(!logFile.is_open()){
+        cout << "Houve um erro ao abrir o LOG!" << endl;
+        exit(EXIT_FAILURE);
+    }  
+    return logFile;
 }
 
 void fecharArquivos(ifstream* input, ofstream* output){
@@ -36,35 +45,35 @@ void fluxoParaTransacao(stringstream* ss, Transacao* t){
     string dia;
     string mes;
     string ano;
-    string agencia1; 
+    string agenciaPrincipal; 
     string conta1;
     string valor;                  
     string agencia2; 
-    string conta2; 
+    string contaComplementar; 
 
     getline(*ss,dia,',');
     getline(*ss,mes,',');
     getline(*ss,ano,',');
-    getline(*ss,agencia1,',');
+    getline(*ss,agenciaPrincipal,',');
     getline(*ss,conta1,',');
     getline(*ss,valor,',');
     getline(*ss,agencia2,',');
-    getline(*ss,conta2,',');
+    getline(*ss,contaComplementar,',');
 
     t->dia = stoi(dia);
     t->mes = stoi(mes);
     t->ano = stoi(ano);
-    t->agencia1 = stoi(agencia1);
-    t->conta1 = stoi(conta1);
+    t->agenciaPrincipal = stoi(agenciaPrincipal);
+    t->contaPrincipal = stoi(conta1);
     t->valor = stof(valor);
 
     //Estou assumindo que se não tiver uma segunda agencia também não terá uma segunda conta
     if(agencia2.length() != 0){
-        t->agencia2 = stoi(agencia2);
-        t->conta2 = stoi(conta2);
+        t->agenciaComplementar = stoi(agencia2);
+        t->contaComplementar = stoi(contaComplementar);
     }else{
-        t->agencia2 = -1;
-        t->conta2 = -1;
+        t->agenciaComplementar = -1;
+        t->contaComplementar = -1;
     }
         
 }
