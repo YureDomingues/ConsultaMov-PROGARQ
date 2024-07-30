@@ -21,7 +21,9 @@ void fluxoParaTransacao(stringstream* ss, Transacao* t);
 void alocarNoFluxoAString(string linha, stringstream* ss, Transacao *t);
 ofstream abrirLogFile(string nomeDoArquivoLog);
 ofstream abrirArquivoBinSaida(string locArquivoBin);
-void escreverStringEmArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes);
+void escreverDadosArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes);
+ifstream abrirArquivoBinEntrada(string locArquivoBin);
+InfoConsolidada lerDadosArquivoBin(ifstream *arqBin);
 
 
 #endif /*TRASACOES_H*/

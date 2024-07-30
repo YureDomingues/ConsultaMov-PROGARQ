@@ -19,6 +19,14 @@ typedef struct transacao{
     int contaComplementar;   
 }Transacao;
 
+typedef struct infoConsolidada{
+    int agencia;
+    int conta;
+    double movEspecie;
+    double movEletronica;
+    int nTransacoes;
+}InfoConsolidada;
+
 Transacao* verificaDataTransacao(Transacao* t, int mes, int ano);
 void imprimirTransacao(Transacao t);
 void realizarConsultaData();

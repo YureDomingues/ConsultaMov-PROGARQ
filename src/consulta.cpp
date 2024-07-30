@@ -4,8 +4,10 @@
 #include <fstream>
 #include <sstream>
 
-#include <map>
+#include <chrono>
+#include <ctime>
 
+#include <map>
 #include <tuple>
 
 #include "../inc/consulta.h"
@@ -26,7 +28,8 @@ Transacao *verificaDataTransacao(Transacao *t, int mes, int ano)
 }
 
 class Data
-{
+{   
+    int dia;
     int mes;
     int ano;
 
@@ -40,6 +43,14 @@ public:
         this->mes = mes;
         this->ano = ano;
     }
+    Data(int dia, int mes, int ano){
+        this->dia = dia;
+        this->mes = mes;
+        this->ano = ano;
+    }
+    int getDia(){
+        return dia;
+    }
     int getMes()
     {
         return mes;
@@ -47,6 +58,12 @@ public:
     int getAno()
     {
         return ano;
+    }
+    string getData(){
+        stringstream dt;
+        dt << dia << "/" << mes << "/" <<ano;
+        return dt.str();
+
     }
     bool dataValida()
     {
@@ -84,6 +101,16 @@ public:
         return (ano == this->ano && mes == this->mes);
     }
 };
+
+
+string getTimeStr(){
+    time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+
+    string s(20, '\0'); //YYYY-MM-DD HH:MM:SS\0    (20 caracteres)
+    strftime(&s[0], s.size(), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    return s;
+}
+
 
 // Função auxiliar
 bool constaNoLog(Data data)
@@ -136,7 +163,7 @@ void gerarConsolidadasBin(map<string, tuple<double, double, int> > *mapaTransaco
 
         numeroDeTransacoes += nTransacoesConta;
 
-        escreverStringEmArquivoBin(&arqBin, agenciaEConta, get<0>(v.second), get<1>(v.second), nTransacoesConta);
+        escreverDadosArquivoBin(&arqBin, agenciaEConta, get<0>(v.second), get<1>(v.second), nTransacoesConta);
 
         //ImprimindoInformaçõesNoConsole
         cout << agenciaEConta << ' ' << valorEsp.str() << ' ' << valorEle.str() << ' ' << nTransacoesConta << endl;
@@ -147,8 +174,7 @@ void gerarConsolidadasBin(map<string, tuple<double, double, int> > *mapaTransaco
     arqBin.close();
 }
 
-void realizarConsultaData()
-{
+void realizarConsultaData(){
     Data data;
     
     ofstream logFileOut = abrirLogFile("LOG.txt");
@@ -157,14 +183,92 @@ void realizarConsultaData()
     Transacao t;
     string linha;
     stringstream ss;
+
     map<string, tuple<double, double, int>> mapaTransacoes;
+    
+    int e_ou = -1;
 
-    if (constaNoLog(data))
-    {
-        cout << "A consulta já foi realizada, abrindo banco de dados..." << endl;
-        /**/
+    if (constaNoLog(data)){
+        char escolha;
+        bool filtra = false;
+        bool uniao;
+        double valorMinimoEsp = 0;
+        double valorMinimoEle = 0;
+        int numeroRegistros = 0;
+        
+        cout << "A consulta já foi realizada..." << endl;
+        cout << "Você deseja realizar uma filtragem? (S/N)" << endl;
+        cin >> escolha;
 
+        if(escolha == 'S' || escolha == 's'){
+            filtra = true;
+            cout << "O filtro irá procurar todos as transações que movimentaram em espécie no mínimo: ";
+            cin >> valorMinimoEsp;
+            cout << "O filtro irá procurar todos as transações que movimentaram eletronicamente no mínimo: ";
+            cin >> valorMinimoEle;
 
+            cout << "Você deseja que o filtro seja E(0) ou OU(1): ";
+            cin >> e_ou;
+
+            if(e_ou == 0){
+                uniao = false;
+            }else{
+                uniao = true;
+            }
+            
+        }
+   
+
+        stringstream mes, ano;
+        stringstream locArquivoBin;
+        InfoConsolidada info;
+
+        mes << std::setw(2) << std::setfill('0') << data.getMes();
+        ano << std::setw(4) << std::setfill('0') << data.getAno();
+        
+        // cout << mes.str() << "/" << ano.str() << endl;
+
+        locArquivoBin << "./bin/" << "consolidadas" << mes.str() << ano.str() << ".bin"; 
+
+        ifstream inpCons = abrirArquivoBinEntrada(locArquivoBin.str());
+
+        while(!inpCons.eof()){
+            info = lerDadosArquivoBin(&inpCons);
+            if(filtra){
+                if(uniao){
+                    if (valorMinimoEsp <= info.movEspecie || valorMinimoEle <= info.movEletronica ){
+                        numeroRegistros++;
+                        cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;
+                    }
+                }else{
+                    if(valorMinimoEsp <= info.movEspecie && valorMinimoEle <= info.movEletronica){
+                        numeroRegistros++;
+                        cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;
+                    }
+                }
+
+            }else{
+                numeroRegistros++;
+                cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;   
+            }
+             
+        }
+
+        cout << "Número de registros: " << numeroRegistros << endl;
+
+        stringstream dadosLog;
+        string fluxoEscolha;
+
+        if(e_ou == 0){
+            fluxoEscolha = "E";
+        }else{
+            fluxoEscolha = "OU";
+        }
+
+        dadosLog << getTimeStr().substr(0, 19) << ' ' << valorMinimoEsp << ' ' << valorMinimoEle << ' ' << fluxoEscolha << ' ' << numeroRegistros;
+
+        logFileOut.write(dadosLog.str().c_str(), dadosLog.str().length());
+        logFileOut.put('\n');
     }
     else
     {

@@ -37,7 +37,16 @@ ofstream abrirLogFile(string nomeDoArquivoLog){
 }
 
 ofstream abrirArquivoBinSaida(string locArquivoBin){
-    ofstream binFile(locArquivoBin, ios::binary); //abrindo em modo append
+    ofstream binFile(locArquivoBin, ios::binary); 
+    if(!binFile.is_open()){
+        cout << "Houve um erro ao abrir o arquivo " << locArquivoBin << "!" << endl;
+        exit(EXIT_FAILURE);
+    }  
+    return binFile;
+}
+
+ifstream abrirArquivoBinEntrada(string locArquivoBin){
+    ifstream binFile(locArquivoBin, ios::binary); 
     if(!binFile.is_open()){
         cout << "Houve um erro ao abrir o arquivo " << locArquivoBin << "!" << endl;
         exit(EXIT_FAILURE);
@@ -93,14 +102,27 @@ void alocarNoFluxoAString(string linha, stringstream* ss, Transacao *t){
     (*ss).clear();
 }
 
-void escreverStringEmArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes){
-    arqBin->write(agenciaEConta.c_str(), agenciaEConta.length());
+void escreverDadosArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes){
+    // O formato da string está AAA-CCCC (AAA é a agencia e CCCC é a conta)
+    
+    int agencia = stoi(agenciaEConta);
+    int conta = stoi(agenciaEConta.substr(4));
+
+    arqBin->write(reinterpret_cast<const char*>(&agencia), sizeof(int));
+    arqBin->write(reinterpret_cast<const char*>(&conta), sizeof(int));
     arqBin->write(reinterpret_cast<const char*>(&movEspecie), sizeof(double));
     arqBin->write(reinterpret_cast<const char*>(&movEletronica), sizeof(double));
     arqBin->write(reinterpret_cast<const char*>(&numTransacoes), sizeof(int));
-    arqBin->put('\n');
 }
 
-string lerStringArquivoBin(ifstream *arqBin){
+InfoConsolidada lerDadosArquivoBin(ifstream *arqBin){
+    InfoConsolidada info;
+    
+    arqBin->read((char*)&info.agencia,sizeof(int));
+    arqBin->read((char*)&info.conta,sizeof(int));
+    arqBin->read((char*)&info.movEspecie, sizeof(double));
+    arqBin->read((char*)&info.movEletronica, sizeof(double));
+    arqBin->read((char*)&info.nTransacoes, sizeof(int));
 
+    return info;
 }
