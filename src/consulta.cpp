@@ -1,79 +1,100 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "../headers/consulta.h"
-#include "../headers/manipulacao.h"
 
 #include <map>
 
+#include <tuple>
+
+#include "../headers/consulta.h"
+#include "../headers/manipulacao.h"
+
 using namespace std;
 
-Transacao* verificaDataTransacao(Transacao* t, int mes, int ano){
-    if(t->mes == mes && t->ano == ano){
+Transacao *verificaDataTransacao(Transacao *t, int mes, int ano)
+{
+    if (t->mes == mes && t->ano == ano)
+    {
         return t;
-    }else{
+    }
+    else
+    {
         return NULL;
     }
 }
 
-class Data{
+class Data
+{
     int mes;
     int ano;
 
-    public:
-    Data(){
+public:
+    Data()
+    {
         coletaData();
     }
-    Data(int mes, int ano){
+    Data(int mes, int ano)
+    {
         this->mes = mes;
         this->ano = ano;
     }
-    int getMes(){
+    int getMes()
+    {
         return mes;
     }
-    int getAno(){
+    int getAno()
+    {
         return ano;
-    } 
-    bool dataValida(){
+    }
+    bool dataValida()
+    {
         return (mes >= 1 && mes <= 12) && (ano > 1900);
     }
-    void coletaData(){
+    void coletaData()
+    {
         bool validDate = false;
-    
-        while(!validDate){
-            
+
+        while (!validDate)
+        {
+
             cout << "Digite o mês da busca: ";
             cin >> this->mes;
             cout << "Agora digite o ano: ";
             cin >> this->ano;
 
-            if(dataValida()){
+            if (dataValida())
+            {
                 validDate = true;
-            }else{
-                cout << "A data digitada é invalida.\n" << endl;
-                
             }
-
-
+            else
+            {
+                cout << "A data digitada é invalida.\n"
+                     << endl;
+            }
         }
     }
-    string dataToString(){
-        return (to_string(mes)+'/'+to_string(ano));
+    string dataToString()
+    {
+        return (to_string(mes) + '/' + to_string(ano));
     }
-    bool dataIgual(int ano, int mes){
+    bool dataIgual(int ano, int mes)
+    {
         return (ano == this->ano && mes == this->mes);
     }
 };
 
-//Função auxiliar
-bool constaNoLog(Data data){
+// Função auxiliar
+bool constaNoLog(Data data)
+{
     ifstream inFile = abrirArquivoEntrada("LOG.txt");
     string linha;
     bool consta = false;
 
-    while (getline(inFile, linha)) {
-        if(linha == data.dataToString())
+    while (getline(inFile, linha))
+    {
+        if (linha == data.dataToString())
             consta = true;
     }
 
@@ -81,78 +102,97 @@ bool constaNoLog(Data data){
     return consta;
 }
 
-void gerarConsolidadasBin(Data data){
-    Transacao t;
-    ifstream inFile = abrirArquivoEntrada("transacoes.csv");
-    ofstream outAux = abrirArquivoSaida("auxiliar-consulta.txt");
-    ofstream log = abrirLogFile("LOG.txt");
-    string linha;
-    stringstream ss;
-    map<string, TransacaoConsolidada> mapaTransacoes; 
-    TransacaoConsolidada tConsolidada(0,0);
-    int numeroDeTransacoes = 0;
+void gerarConsolidadasBin(map<string, tuple<double, double, int>> *mapaTransacoes){
 
-    while(getline(inFile, linha)){
+int numeroDeTransacoes = 0;
 
-        alocarNoFluxoAString(linha, &ss, &t);
+for (auto v : *mapaTransacoes){
 
-        if(data.dataIgual(t.ano, t.mes)){
-            numeroDeTransacoes++;
-            string agenciaEConta = to_string(t.agenciaPrincipal) + "-" + to_string(t.contaPrincipal);
+    stringstream valorEsp;
+    stringstream valorEle;
+    int nTransacoesConta;
 
-            tConsolidada.adicionarMovimentacaoEspecie(t.valor);
-            
-            mapaTransacoes[agenciaEConta] = tConsolidada;
-            mapaTransacoes.insert(make_pair(agenciaEConta, tConsolidada));
-        }
+    valorEsp << fixed << showpoint;
+    valorEsp << setprecision(2);
+    valorEle << fixed << showpoint;
+    valorEle << setprecision(2);
 
-        alocarNoFluxoAString(linha, &ss, &t);
+    string conteudo = v.first;
 
-    }
+    valorEsp << get<0>(v.second);
+    valorEle << get<1>(v.second);
+    nTransacoesConta = get<2>(v.second);
 
-    map<string, TransacaoConsolidada>::iterator it;
+    numeroDeTransacoes += nTransacoesConta;
 
-    for(it=mapaTransacoes.begin(); it!=mapaTransacoes.end(); ++it){
-        string conteudo = it->first;
-        outAux.write(it->first.c_str(), it->first.length());
-        outAux.put('\n');
-    }
-
-    cout << "Numero de transações do mês: " << numeroDeTransacoes << endl;
-    
-    inFile.close();
-    outAux.close();
-    log.close();
+    cout << v.first << ' ' << valorEsp.str() << ' ' << valorEle.str() << ' ' << nTransacoesConta << endl;
 }
 
-void realizarConsultaData(){
+    cout << "Numero de transações do mês: " << numeroDeTransacoes << endl;
+}
+
+void realizarConsultaData()
+{
     Data data;
-    ofstream logFileOut = abrirLogFile("LOG.txt");
     
-    if(constaNoLog(data)){
+    ofstream logFileOut = abrirLogFile("LOG.txt");
+    ifstream inFile = abrirArquivoEntrada("transacoes.csv");
+    
+    Transacao t;
+    string linha;
+    stringstream ss;
+    map<string, tuple<double, double, int>> mapaTransacoes;
+
+    if (constaNoLog(data))
+    {
         cout << "A consulta já foi realizada, abrindo banco de dados..." << endl;
         /**/
-    }else{
+
+
+    }
+    else
+    {
         logFileOut.write(data.dataToString().c_str(), data.dataToString().length());
-        logFileOut.put('\n'); 
+        logFileOut.put('\n');
 
-        gerarConsolidadasBin(data);
+        while (getline(inFile, linha)){
 
+        alocarNoFluxoAString(linha, &ss, &t);
+
+        if (data.dataIgual(t.ano, t.mes)){
+            
+            string agenciaEConta = to_string(t.agenciaPrincipal) + "-" + to_string(t.contaPrincipal);
+
+            if (t.contaComplementar == -1 || t.agenciaComplementar == -1)
+            {
+                get<0>(mapaTransacoes[agenciaEConta]) += max(t.valor, -t.valor); // Valor Especie
+            }
+            else
+            {
+                get<1>(mapaTransacoes[agenciaEConta]) += max(t.valor, -t.valor); // Valor Eletronico
+            }
+
+            get<2>(mapaTransacoes[agenciaEConta])++;
+        }
         
+        }
+        
+        gerarConsolidadasBin(&mapaTransacoes);
     }
 
     logFileOut.close();
+    inFile.close();
 }
 
-
-
-void imprimirTransacao(Transacao t){
+void imprimirTransacao(Transacao t)
+{
     cout << "data: " << t.dia << '/' << t.mes << '/' << t.ano << endl;
     cout << "agenciaPrincipal: " << t.agenciaPrincipal << endl;
     cout << "contaPrincipal: " << t.contaPrincipal << endl;
     cout << "valor: " << t.valor << endl;
 
-    if(t.agenciaComplementar != -1){
+    if (t.agenciaComplementar != -1)
+    {
         cout << "agenciaComplementar: " << t.agenciaComplementar << endl;
         cout << "contaComplementar: " << t.contaComplementar << endl;
     }
