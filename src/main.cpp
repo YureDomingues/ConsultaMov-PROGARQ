@@ -2,14 +2,10 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "../headers/consulta.h"
-#include "../headers/manipulacao.h"
+#include "../inc/consulta.h"
+#include "../inc/manipulacao.h"
 
 int main(){
-    
-    
-    
-   
 
     realizarConsultaData();
 

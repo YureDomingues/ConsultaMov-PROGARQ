@@ -20,6 +20,8 @@ void fecharArquivos(ifstream* input, ofstream* output);
 void fluxoParaTransacao(stringstream* ss, Transacao* t);
 void alocarNoFluxoAString(string linha, stringstream* ss, Transacao *t);
 ofstream abrirLogFile(string nomeDoArquivoLog);
+ofstream abrirArquivoBinSaida(string locArquivoBin);
+void escreverStringEmArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes);
 
 
 #endif /*TRASACOES_H*/

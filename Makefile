@@ -5,7 +5,7 @@ SRC := "src/main.cpp" "src/consulta.cpp" "src/manipulacao.cpp"  #arquivos de ent
 
 OUT := main.out #Arquivo de saída
 
-OTHERS:= LOG.txt auxiliar-consulta.txt
+OTHERS:= LOG.txt auxiliar-consulta.txt bin/consolidadas*
 
 all:	#Compila tudo
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(OUT)

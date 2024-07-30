@@ -2,8 +2,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "../headers/consulta.h"
-#include "../headers/manipulacao.h"
+#include "../inc/consulta.h"
+#include "../inc/manipulacao.h"
 
 ifstream abrirArquivoEntrada(string nomeDoArquivo){
     ifstream inFile(nomeDoArquivo);
@@ -34,6 +34,15 @@ ofstream abrirLogFile(string nomeDoArquivoLog){
         exit(EXIT_FAILURE);
     }  
     return logFile;
+}
+
+ofstream abrirArquivoBinSaida(string locArquivoBin){
+    ofstream binFile(locArquivoBin, ios::binary); //abrindo em modo append
+    if(!binFile.is_open()){
+        cout << "Houve um erro ao abrir o arquivo " << locArquivoBin << "!" << endl;
+        exit(EXIT_FAILURE);
+    }  
+    return binFile;
 }
 
 void fecharArquivos(ifstream* input, ofstream* output){
@@ -82,4 +91,16 @@ void alocarNoFluxoAString(string linha, stringstream* ss, Transacao *t){
     (*ss).str(linha);
     fluxoParaTransacao(ss, t);
     (*ss).clear();
+}
+
+void escreverStringEmArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes){
+    arqBin->write(agenciaEConta.c_str(), agenciaEConta.length());
+    arqBin->write(reinterpret_cast<const char*>(&movEspecie), sizeof(double));
+    arqBin->write(reinterpret_cast<const char*>(&movEletronica), sizeof(double));
+    arqBin->write(reinterpret_cast<const char*>(&numTransacoes), sizeof(int));
+    arqBin->put('\n');
+}
+
+string lerStringArquivoBin(ifstream *arqBin){
+
 }

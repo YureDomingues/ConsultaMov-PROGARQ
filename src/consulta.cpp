@@ -8,8 +8,8 @@
 
 #include <tuple>
 
-#include "../headers/consulta.h"
-#include "../headers/manipulacao.h"
+#include "../inc/consulta.h"
+#include "../inc/manipulacao.h"
 
 using namespace std;
 
@@ -102,33 +102,49 @@ bool constaNoLog(Data data)
     return consta;
 }
 
-void gerarConsolidadasBin(map<string, tuple<double, double, int>> *mapaTransacoes){
+void gerarConsolidadasBin(map<string, tuple<double, double, int> > *mapaTransacoes, Data data){
 
-int numeroDeTransacoes = 0;
+    int numeroDeTransacoes = 0;
+    stringstream nomeArquivoBinario;
+    stringstream mes;
+    stringstream ano; 
+    string pastaBinarios = "./bin/";
 
-for (auto v : *mapaTransacoes){
+    mes << std::setw(2) << std::setfill('0') << data.getMes();
+    ano << std::setw(4) << std::setfill('0') << data.getAno();
 
-    stringstream valorEsp;
-    stringstream valorEle;
-    int nTransacoesConta;
+    nomeArquivoBinario << "consolidadas" << mes.str() << ano.str() << ".bin";
 
-    valorEsp << fixed << showpoint;
-    valorEsp << setprecision(2);
-    valorEle << fixed << showpoint;
-    valorEle << setprecision(2);
+    ofstream arqBin = abrirArquivoBinSaida(pastaBinarios + nomeArquivoBinario.str());
+    
+    for(auto v : *mapaTransacoes){
 
-    string conteudo = v.first;
+        stringstream valorEsp;
+        stringstream valorEle;
+        int nTransacoesConta;
 
-    valorEsp << get<0>(v.second);
-    valorEle << get<1>(v.second);
-    nTransacoesConta = get<2>(v.second);
+        valorEsp << fixed << showpoint;
+        valorEsp << setprecision(2);
+        valorEle << fixed << showpoint;
+        valorEle << setprecision(2);
 
-    numeroDeTransacoes += nTransacoesConta;
+        string agenciaEConta = v.first;
 
-    cout << v.first << ' ' << valorEsp.str() << ' ' << valorEle.str() << ' ' << nTransacoesConta << endl;
-}
+        valorEsp << get<0>(v.second);
+        valorEle << get<1>(v.second);
+        nTransacoesConta = get<2>(v.second);
+
+        numeroDeTransacoes += nTransacoesConta;
+
+        escreverStringEmArquivoBin(&arqBin, agenciaEConta, get<0>(v.second), get<1>(v.second), nTransacoesConta);
+
+        //ImprimindoInformaçõesNoConsole
+        cout << agenciaEConta << ' ' << valorEsp.str() << ' ' << valorEle.str() << ' ' << nTransacoesConta << endl;
+    }
 
     cout << "Numero de transações do mês: " << numeroDeTransacoes << endl;
+
+    arqBin.close();
 }
 
 void realizarConsultaData()
@@ -177,7 +193,7 @@ void realizarConsultaData()
         
         }
         
-        gerarConsolidadasBin(&mapaTransacoes);
+        gerarConsolidadasBin(&mapaTransacoes, data);
     }
 
     logFileOut.close();
