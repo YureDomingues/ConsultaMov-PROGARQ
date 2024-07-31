@@ -2,61 +2,55 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <map>
 #include "../inc/consulta.h"
 #include "../inc/manipulacao.h"
 
-ifstream abrirArquivoEntrada(string nomeDoArquivo){
-    ifstream inFile(nomeDoArquivo);
+ifstream abrirArquivoLeitura(string arquivo, char modo){
+    
+    map<char, ios_base::openmode> modoMap;
+    
+    modoMap['i'] = ios::in;
+    modoMap['b'] = ios::binary | ios::in;
+    modoMap['a'] = ios::app;
+
+    if (modoMap.find(modo) == modoMap.end()) {
+        cout << "Modo de abertura não reconhecido: " << modo << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ifstream inFile(arquivo, modoMap[modo]);
 
     if(!inFile.is_open()){
-        cout << "Houve um erro ao ler o arquivo " << nomeDoArquivo << "!" << endl;
+        cout << "Houve um erro ao ler o arquivo " << arquivo << "!" << endl;
+        cout << "Fechando..." << endl;
         exit(EXIT_FAILURE);
-    }  
+    } 
 
     return inFile;
 }
 
-ofstream abrirArquivoSaida(string nomeDoArquivo){
-    ofstream outFile(nomeDoArquivo);
+ofstream abrirArquivoEscrita(string arquivo, char modo){
+    map<char, ios_base::openmode> modoMap;
+    
+    modoMap['o'] = ios::out;
+    modoMap['b'] = ios::binary | ios::out;
+    modoMap['a'] = ios::app;
+
+    if (modoMap.find(modo) == modoMap.end()) {
+        cout << "Modo de abertura não reconhecido: " << modo << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ofstream outFile(arquivo, modoMap[modo]);
 
     if(!outFile.is_open()){
-        cout << "Houve um erro ao abrir o arquivo de saída '" << nomeDoArquivo << "'!" << endl;
+        cout << "Houve um erro ao abrir o arquivo de saída '" << arquivo << "'!" << endl;
+        cout << "Fechando..." << endl;
         exit(EXIT_FAILURE);
     }  
 
     return outFile;
-}
-
-ofstream abrirLogFile(string nomeDoArquivoLog){
-    ofstream logFile(nomeDoArquivoLog, ios::app); //abrindo em modo append
-    if(!logFile.is_open()){
-        cout << "Houve um erro ao abrir o LOG!" << endl;
-        exit(EXIT_FAILURE);
-    }  
-    return logFile;
-}
-
-ofstream abrirArquivoBinSaida(string locArquivoBin){
-    ofstream binFile(locArquivoBin, ios::binary); 
-    if(!binFile.is_open()){
-        cout << "Houve um erro ao abrir o arquivo " << locArquivoBin << "!" << endl;
-        exit(EXIT_FAILURE);
-    }  
-    return binFile;
-}
-
-ifstream abrirArquivoBinEntrada(string locArquivoBin){
-    ifstream binFile(locArquivoBin, ios::binary); 
-    if(!binFile.is_open()){
-        cout << "Houve um erro ao abrir o arquivo " << locArquivoBin << "!" << endl;
-        exit(EXIT_FAILURE);
-    }  
-    return binFile;
-}
-
-void fecharArquivos(ifstream* input, ofstream* output){
-    input->close();
-    output->close();
 }
 
 void fluxoParaTransacao(stringstream* ss, Transacao* t){
@@ -64,30 +58,29 @@ void fluxoParaTransacao(stringstream* ss, Transacao* t){
     string mes;
     string ano;
     string agenciaPrincipal; 
-    string conta1;
+    string contaPrincipal;
     string valor;                  
-    string agencia2; 
+    string agenciaComplementar; 
     string contaComplementar; 
 
     getline(*ss,dia,',');
     getline(*ss,mes,',');
     getline(*ss,ano,',');
     getline(*ss,agenciaPrincipal,',');
-    getline(*ss,conta1,',');
+    getline(*ss,contaPrincipal,',');
     getline(*ss,valor,',');
-    getline(*ss,agencia2,',');
+    getline(*ss,agenciaComplementar,',');
     getline(*ss,contaComplementar,',');
 
     t->dia = stoi(dia);
     t->mes = stoi(mes);
     t->ano = stoi(ano);
     t->agenciaPrincipal = stoi(agenciaPrincipal);
-    t->contaPrincipal = stoi(conta1);
-    t->valor = stof(valor);
-
-    //Estou assumindo que se não tiver uma segunda agencia também não terá uma segunda conta
-    if(agencia2.length() != 0){
-        t->agenciaComplementar = stoi(agencia2);
+    t->contaPrincipal = stoi(contaPrincipal);
+    t->valor = stod(valor);
+    
+    if(agenciaComplementar.length() != 0){
+        t->agenciaComplementar = stoi(agenciaComplementar);
         t->contaComplementar = stoi(contaComplementar);
     }else{
         t->agenciaComplementar = -1;

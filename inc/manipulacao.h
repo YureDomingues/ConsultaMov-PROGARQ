@@ -14,16 +14,22 @@ Este arquivo é referente à manipulação "direta" dos arquivos de entrada e sa
 
 using namespace std;
 
-ifstream abrirArquivoEntrada(string nomeDoArquivo);
-ofstream abrirArquivoSaida(string nomeDoArquivo);
-void fecharArquivos(ifstream* input, ofstream* output);
+typedef struct infoConsolidada{
+    int agencia;
+    int conta;
+    double movEspecie;
+    double movEletronica;
+    int nTransacoes;
+}InfoConsolidada;
+
+ifstream abrirArquivoLeitura(string arquivo, char modo);
+ofstream abrirArquivoEscrita(string arquivo, char modo);
 void fluxoParaTransacao(stringstream* ss, Transacao* t);
 void alocarNoFluxoAString(string linha, stringstream* ss, Transacao *t);
-ofstream abrirLogFile(string nomeDoArquivoLog);
-ofstream abrirArquivoBinSaida(string locArquivoBin);
 void escreverDadosArquivoBin(ofstream *arqBin, string agenciaEConta, double movEspecie, double movEletronica, int numTransacoes);
-ifstream abrirArquivoBinEntrada(string locArquivoBin);
 InfoConsolidada lerDadosArquivoBin(ifstream *arqBin);
+
+
 
 
 #endif /*TRASACOES_H*/
