@@ -9,17 +9,17 @@
 
 Para o bom funcionamento do programa é necessário que as pastas e arquivos estejam dispostos da seguinte forma:
 
-📁 bin
-📁 inc
-├── consulta.h
-├── manipulacao.h
-📁 src
-├── consulta.cpp
-├── main.cpp
-├── manipulacao.cpp
-Makefile
-transacoes.csv
-README
+📁 bin  
+📁 inc  
+├── consulta.h  
+├── manipulacao.h  
+📁 src  
+├── consulta.cpp  
+├── main.cpp  
+├── manipulacao.cpp  
+Makefile  
+transacoes.csv  
+README.md  
 
 #### Compilação
 
@@ -31,5 +31,5 @@ Para facilitar o processo de desenvolvimento, criamos um arquivo Makefile com os
 
 Caso não queira compilar usando usando o Makefile, pode usar o comando
 
-g++  -Wall -std=c++17   "src/main.cpp" "src/consulta.cpp" "src/manipulacao.cpp" -o main.out
+    g++  -Wall -std=c++17   "src/main.cpp" "src/consulta.cpp" "src/manipulacao.cpp" -o main.out
 
