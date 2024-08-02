@@ -11,8 +11,7 @@ int main(){
 
     while (!whileBreak)
     {
-        cout << "------------------------------------------------" << endl;
-        cout << "Deseja realizar uma busca? (s/n)" << endl;
+        cout << "\nDeseja realizar uma nova busca? (s/n)" << endl;
         cin >> resp;
         if (resp == 's' || resp == 'S')
         {

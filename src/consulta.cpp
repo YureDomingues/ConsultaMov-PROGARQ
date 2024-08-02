@@ -15,93 +15,33 @@
 
 using namespace std;
 
-Transacao *verificaDataTransacao(Transacao *t, int mes, int ano)
-{
-    if (t->mes == mes && t->ano == ano)
-    {
-        return t;
-    }
-    else
-    {
-        return NULL;
-    }
+void imprimirPrimeiraLinha(){
+    cout << "|--------|---------|---------|--|" << endl; 
 }
 
-class Data{   
+//Essa função de imprimir Linha fica em loop, por isso não foi colocada na mesma função de impressão
 
-    int dia;
-    int mes;
-    int ano;
-
-public:
-    Data()
-    {
-        coletaData();
-    }
-    Data(int mes, int ano)
-    {
-        this->mes = mes;
-        this->ano = ano;
-    }
-    Data(int dia, int mes, int ano){
-        this->dia = dia;
-        this->mes = mes;
-        this->ano = ano;
-    }
-    int getDia(){
-        return dia;
-    }
-    int getMes()
-    {
-        return mes;
-    }
-    int getAno()
-    {
-        return ano;
-    }
-    string getData(){
-        stringstream dt;
-        dt << dia << "/" << mes << "/" <<ano;
-        return dt.str();
-
-    }
-    bool dataValida()
-    {
-        return (mes >= 1 && mes <= 12) && (ano > 1900);
-    }
-    void coletaData()
-    {
-        bool validDate = false;
-
-        while (!validDate)
-        {
-
-            cout << "Digite o mês da busca: ";
-            cin >> this->mes;
-            cout << "Agora digite o ano: ";
-            cin >> this->ano;
-
-            if (dataValida())
-            {
-                validDate = true;
-            }
-            else
-            {
-                cout << "A data digitada é invalida.\n"
-                     << endl;
-            }
-        }
-    }
-    string dataToString()
-    {
-        return (to_string(mes) + '/' + to_string(ano));
-    }
-    bool dataIgual(int ano, int mes)
-    {
-        return (ano == this->ano && mes == this->mes);
-    }
+void imprimirLinhaTransacao(string agenciaEConta, double movEspecie, double movEletronica, int numeroTransacoes){
+    cout << "|" << setw(8) << agenciaEConta  << "|" 
+         << setw(9) << fixed << setprecision(2) << movEspecie << "|" 
+         << setw(9) << fixed << setprecision(2) << movEletronica << "|" 
+         << setw(2) << numeroTransacoes << "|" << endl;
 };
 
+void imprimirInfoFinal(int registros, int transacoes){
+    cout << "|--------|---------|---------|--|" << endl;
+    cout << "|AG-CONTA|MOV.ESP. |MOV.ELET.|NT|" << endl;
+    cout << "|--------|---------|---------|--|" << endl;
+    cout << "|" << setw(32) <<              "|" << endl;
+    cout << "|Número de registros: " << setw(10) << registros << "|" << endl;
+    cout << "|Numero de transações: " << setw(9) << transacoes << "|" << endl;
+    cout << "|--------|---------|---------|--|" << endl;
+
+    //Obs: O número de transações é diferente do número de registros. Uma conta pode fazer mais de uma transação, mas ela é apenas um registro
+
+}
+
+//Função para retornar uma string contendo a Data e Horario no formato YYYY-MM-DD HH:MM:SS
 string getTimeStr(){
     time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
 
@@ -110,9 +50,12 @@ string getTimeStr(){
     return s;
 }
 
+
+//Função que gera os arquivos binários e imprime na tela quando uma data é consultada pela primeira vez
 void gerarConsolidadasBin(map<string, tuple<double, double, int> > *mapaTransacoes, Data data){
 
     int numeroDeTransacoes = 0;
+    int numeroDeRegistros = 0;
     stringstream nomeArquivoBinario;
     stringstream mes;
     stringstream ano; 
@@ -125,41 +68,35 @@ void gerarConsolidadasBin(map<string, tuple<double, double, int> > *mapaTransaco
 
     ofstream arqBin = abrirArquivoEscrita(pastaBinarios + nomeArquivoBinario.str(), 'b');
     
+    imprimirPrimeiraLinha();
+
     for(auto v : *mapaTransacoes){
 
-        stringstream valorEsp;
-        stringstream valorEle;
+        double valorEsp;
+        double valorEle;
         int nTransacoesConta;
 
-        valorEsp << fixed << showpoint;
-        valorEsp << setprecision(2);
-        valorEle << fixed << showpoint;
-        valorEle << setprecision(2);
+        numeroDeRegistros++;
 
         string agenciaEConta = v.first; //retorna o vetor "Agencia-Conta" que serve de chave no map
 
-        valorEsp << get<0>(v.second); //retorna valor Movimentado em Espécie pela conta
-        valorEle << get<1>(v.second); //retorna valor Movimentado Eletronicamente pela conta
+        valorEsp = get<0>(v.second); //retorna valor Movimentado em Espécie pela conta
+        valorEle = get<1>(v.second); //retorna valor Movimentado Eletronicamente pela conta
         nTransacoesConta = get<2>(v.second); //returna numero de transacoes realizada pela conta 
 
         numeroDeTransacoes += nTransacoesConta; //Acumulador para todas as transações efetuadas no mês
 
         escreverDadosArquivoBin(&arqBin, agenciaEConta, get<0>(v.second), get<1>(v.second), nTransacoesConta);
 
-        //ImprimindoInformaçõesNoConsole
-        cout << agenciaEConta << ' ' << valorEsp.str() << ' ' << valorEle.str() << ' ' << nTransacoesConta << endl;
-
-        /*No arquivo binário eu estou escrevendo as informações como (int int double double int), diferente do que estou
-        fazendo no cout do console, que printa a string. Essa mudança é apenas para que o arquivo não fique 'legível' no binario
-        e também para ter precisão de duas casas decimais quando aparece na tela.*/
+        imprimirLinhaTransacao(agenciaEConta, valorEsp, valorEle, nTransacoesConta);
     }
 
-    cout << "Numero de transações do mês: " << numeroDeTransacoes << endl;
+    imprimirInfoFinal(numeroDeRegistros, numeroDeTransacoes);
 
     arqBin.close();
 }
 
-// Função auxiliar
+//A consulta pela existência do arquivo binário é feita pelo arquivo LOG, se existir uma data no log, o arquivo binario referente à ela também existe
 bool constaNoLog(Data data){
 
     ifstream inFile = abrirArquivoLeitura("LOG.txt", 'i');
@@ -176,10 +113,17 @@ bool constaNoLog(Data data){
     return consta;
 }
 
+string gerarStringAgenciaEConta(int agencia, int conta){
+    stringstream ss;
+    ss << agencia << "-" << conta;
+    return (ss.str());
+}
+
 void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
     double valorMinimoEsp = 0;
     double valorMinimoEle = 0;
-    int numeroRegistros = 0;
+    int numeroDeRegistros = 0;
+    int numeroDeTransacoes = 0;
     string e_ou;
     stringstream dadosLog;
     InfoConsolidada info;
@@ -196,6 +140,8 @@ void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
     
     cout << endl;
 
+    imprimirPrimeiraLinha();
+
     while(true){
         info = lerDadosArquivoBin(arqBinario);
         
@@ -205,20 +151,22 @@ void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
 
         if(e_ou == "OU" || e_ou == "ou"){
             if (valorMinimoEsp <= info.movEspecie || valorMinimoEle <= info.movEletronica ){
-                    numeroRegistros++;
-                    cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;
+                numeroDeRegistros++;
+                numeroDeTransacoes += info.nTransacoes;
+                imprimirLinhaTransacao(gerarStringAgenciaEConta(info.agencia, info.conta), info.movEspecie, info.movEletronica, info.nTransacoes);
             }
         }else{
             if(valorMinimoEsp <= info.movEspecie && valorMinimoEle <= info.movEletronica){
-                numeroRegistros++;
-                cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;
+                numeroDeRegistros++;
+                numeroDeTransacoes += info.nTransacoes;
+                imprimirLinhaTransacao(gerarStringAgenciaEConta(info.agencia, info.conta), info.movEspecie, info.movEletronica, info.nTransacoes);
             }
         }
     }
 
-    cout << "Número de registros: " << numeroRegistros << endl;
+    imprimirInfoFinal(numeroDeRegistros, numeroDeTransacoes);
 
-    dadosLog << getTimeStr().substr(0, 19) << ' ' << valorMinimoEsp << ' ' << valorMinimoEle << ' ' << e_ou << ' ' << numeroRegistros;
+    dadosLog << getTimeStr().substr(0, 19) << ' ' << valorMinimoEsp << ' ' << valorMinimoEle << ' ' << e_ou << ' ' << numeroDeRegistros;
 
     logFile->write(dadosLog.str().c_str(), dadosLog.str().length());
     logFile->put('\n');
@@ -226,24 +174,30 @@ void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
 
 void naoRealizarFiltragem(ifstream *arqBinario, ofstream *logFile){
     InfoConsolidada info;
-    int numeroRegistros = 0;
+    int numeroDeRegistros = 0;
+    int numeroDeTransacoes = 0;
 
-     while(true){
+    imprimirPrimeiraLinha();
+
+    while(true){
         info = lerDadosArquivoBin(arqBinario);
         
         if(arqBinario->eof()){
             break;
         }
 
-        numeroRegistros++;
-        cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;   
+        numeroDeRegistros++;
+        numeroDeTransacoes += info.nTransacoes;
+
+        imprimirLinhaTransacao(gerarStringAgenciaEConta(info.agencia, info.conta), info.movEspecie, info.movEletronica, info.nTransacoes);
 
      }
 
-     cout << "Número de registros: " << numeroRegistros << endl;
+     imprimirInfoFinal(numeroDeRegistros, numeroDeTransacoes);
 
 }
 
+//Função principal chamada na main que dá inicio a todo processo de consulta
 void realizarConsultaData(){
     Data data;
     
@@ -312,7 +266,7 @@ void realizarConsultaData(){
             }
         
         }
-        
+
         gerarConsolidadasBin(&mapaTransacoes, data);
     }
 
