@@ -1,7 +1,7 @@
 CXX := g++  #Compilador
-CXXFLAGS := -Wall -std=c++17  #(warnings, C++ standard)
+CXXFLAGS := -Wall -std=c++17 #(warnings, C++ standard)
 
-SRC := "src/main.cpp" "src/consulta.cpp" "src/manipulacao.cpp"  #arquivos de entrada
+SRC := "src/main.cpp" "src/consulta.cpp" "src/manipulacao.cpp" #arquivos de entrada
 
 OUT := main.out #Arquivo de saída
 
