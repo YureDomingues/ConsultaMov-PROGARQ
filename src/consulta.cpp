@@ -177,7 +177,6 @@ bool constaNoLog(Data data){
 }
 
 void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
-    bool uniao;
     double valorMinimoEsp = 0;
     double valorMinimoEle = 0;
     int numeroRegistros = 0;
@@ -191,17 +190,11 @@ void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
     cin >> valorMinimoEle;
 
     do{
-        cout << "Você deseja que o filtro seja E ou OU ";
+        cout << "Você deseja que o filtro seja E ou OU: ";
         cin >> e_ou;
     }while(e_ou != "E" && e_ou != "e"  && e_ou != "OU" && e_ou != "ou");
     
     cout << endl;
-
-    if(e_ou.compare("E")){
-        uniao = false;
-    }else{
-        uniao = true;
-    }
 
     while(true){
         info = lerDadosArquivoBin(arqBinario);
@@ -210,7 +203,7 @@ void realizarFiltragem(ifstream *arqBinario, ofstream *logFile){
             break;
         }
 
-        if(uniao){
+        if(e_ou == "OU" || e_ou == "ou"){
             if (valorMinimoEsp <= info.movEspecie || valorMinimoEle <= info.movEletronica ){
                     numeroRegistros++;
                     cout << info.agencia << "-" << info.conta << " " << info.movEspecie << " " << info.movEletronica << " " << info.nTransacoes << endl;
