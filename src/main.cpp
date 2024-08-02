@@ -6,25 +6,25 @@
 #include "../inc/manipulacao.h"
 
 int main(){
-int whilebreak = 0;
-    char resp[1];
+    bool whileBreak = false;
+    char resp;
 
-    while (whilebreak == 0)
+    while (!whileBreak)
     {
         cout << "------------------------------------------------" << endl;
         cout << "Deseja realizar uma busca? (s/n)" << endl;
-        cin >> resp[1];
-        if (resp[1] == 's' || resp[1] == 'S')
+        cin >> resp;
+        if (resp == 's' || resp == 'S')
         {
             realizarConsultaData();
         }
-        else if (resp[1] == 'n' || resp[1] == 'N')
+        else if (resp == 'n' || resp == 'N')
         {
-            whilebreak = 1;
-            cout << "Busca finalizada" << endl;
+            whileBreak = true;
+            cout << "Fechando..." << endl;
         }
         else
-            cout << "Resposta incorreta" << endl;
+            cout << "Escolha uma opção válida" << endl;
     }
 
     return 0;
